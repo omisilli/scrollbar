@@ -8,14 +8,15 @@
  *                               gutter leaves. 18px
  *   --pg-scrollbar-inset        the gap to the strip's ends and outer edge.
  *                               4px
- *   --pg-scrollbar-size         the thumb's thickness. 6px
+ *   --pg-scrollbar-size         the thumb's thickness. 8px
  *   --pg-scrollbar-size-hover   its thickness under the pointer. 10px
  *   --pg-scrollbar-min          the shortest grip, on a very long page. 32px
- *   --pg-scrollbar-color        the thumb. A half-tone grey at 60%, for
- *                               light and dark themes alike
- *   --pg-scrollbar-track        the strip while shown. The same grey at 10%
- *   --pg-scrollbar-shadow       around the thumb, so it shows over photos
- *                               too. 0 0 4px rgb(0 0 0 / 0.2)
+ *   --pg-scrollbar-color        the thumb. The text colour at 60% — dark on
+ *                               a light page, light on a dark one
+ *   --pg-scrollbar-color-hover  the thumb under the pointer. Text at 70%
+ *   --pg-scrollbar-track        the strip while shown. Text at 10%
+ *   --pg-scrollbar-shadow       around the thumb, e.g. to show over photos.
+ *                               none
  *
  * The bar works only with a script and a mouse — (scripting: enabled) and
  * (pointer: fine). Elsewhere — no script, a touch screen — the strip is not
@@ -64,12 +65,15 @@
         display: none;
     }
 
-    /* Room for the strip, which floats over the content: what carries
-       this attribute keeps its background to the edge and centres its
-       content in what is left. Not on fixed parts such as a header — the
-       bar does not scroll them. */
+    /* Room for the strip, which floats over the content: a section that
+       carries this keeps its background to the edge and centres its content
+       in what is left. A transparent border, not padding, so it adds to the
+       section's own padding instead of replacing it; the colour is forced
+       so a utility's border-color cannot paint it. Per section, as needed —
+       not on a full-width slider or banner, which should run under the bar. */
     html:has([data-pg-scrollbar]) [data-pg-scrollbar-gutter] {
-        padding-inline-end: var(--pg-scrollbar-area);
+        border-inline-end: var(--pg-scrollbar-area) solid transparent;
+        border-inline-end-color: transparent !important;
     }
 
     /* The strip: a panel's, at its box's edge; the page's, at the screen's. */
@@ -89,7 +93,7 @@
         z-index: 50;
     }
     :where([data-pg-scrollbar][data-pg-scrollbar-active="true"]) {
-        background-color: var(--pg-scrollbar-track, rgb(127 127 127 / 0.1));
+        background-color: var(--pg-scrollbar-track, color-mix(in srgb, currentColor 10%, transparent));
     }
 
     /* The grip: as wide as the strip, so it is easy to take hold of; index.ts
@@ -109,21 +113,23 @@
     }
 
     :where([data-pg-scrollbar-thumb]) {
-        width: var(--pg-scrollbar-size, 6px);
+        width: var(--pg-scrollbar-size, 8px);
         height: 100%;
         border-radius: 999px;
-        background-color: var(--pg-scrollbar-color, rgb(127 127 127 / 0.6));
-        box-shadow: var(--pg-scrollbar-shadow, 0 0 4px rgb(0 0 0 / 0.2));
+        background-color: var(--pg-scrollbar-color, color-mix(in srgb, currentColor 60%, transparent));
+        box-shadow: var(--pg-scrollbar-shadow, none);
         opacity: 0;
         transition:
             opacity 0.3s,
-            width 0.2s;
+            width 0.2s,
+            background-color 0.2s;
     }
     :where([data-pg-scrollbar-active="true"]) :where([data-pg-scrollbar-thumb]) {
         opacity: 1;
     }
     :where([data-pg-scrollbar]:hover, [data-pg-scrollbar-dragging="true"]) :where([data-pg-scrollbar-thumb]) {
         width: var(--pg-scrollbar-size-hover, 10px);
+        background-color: var(--pg-scrollbar-color-hover, color-mix(in srgb, currentColor 70%, transparent));
     }
 
     /* While dragging: the hand stays closed wherever the pointer goes, and

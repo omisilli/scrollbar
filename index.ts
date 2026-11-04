@@ -147,32 +147,52 @@ function setup(strip: HTMLElement): Bar | null {
     };
 
     /* Dragging: as the browser's own bar does, at once — the page follows
-       the pointer. Pointer capture keeps the drag going off the strip. */
+       the pointer. Pointer capture keeps the drag going off the strip; the
+       drag ends on release, and also on any move with the button already up
+       — a release can be missed (let go outside the window, say), and a
+       drag must never outlive the press. */
+    const endDrag = (): void => {
+        if (!dragging) return;
+        dragging = false;
+        removeEventListener("pointermove", onDragMove);
+        removeEventListener("pointerup", endDrag);
+        removeEventListener("pointercancel", endDrag);
+        removeEventListener("blur", endDrag);
+        grip.removeEventListener("lostpointercapture", endDrag);
+        if (grip.hasPointerCapture(pointer)) grip.releasePointerCapture(pointer);
+        write(strip, DRAGGING, "false");
+        document.documentElement.removeAttribute(DRAGGING);
+        // Fade as after any scroll, not at once.
+        onScroll();
+    };
+    const onDragMove = (event: PointerEvent): void => {
+        if ((event.buttons & 1) === 0) return endDrag();
+        const g = geometry();
+        if (g.travel) scrollTo(startTop + ((event.clientY - startY) * g.range) / g.travel, "instant");
+    };
+    let pointer = -1;
     const onGripDown = (event: PointerEvent): void => {
         if (event.button !== 0) return;
         event.preventDefault();
         event.stopPropagation();
         dragging = true;
+        pointer = event.pointerId;
         startY = event.clientY;
         startTop = top();
-        grip.setPointerCapture(event.pointerId);
+        try {
+            grip.setPointerCapture(pointer);
+        } catch {
+            // Not capturable (a synthetic event): the window listeners below
+            // still follow the drag.
+        }
+        addEventListener("pointermove", onDragMove);
+        addEventListener("pointerup", endDrag);
+        addEventListener("pointercancel", endDrag);
+        addEventListener("blur", endDrag);
+        grip.addEventListener("lostpointercapture", endDrag);
         write(strip, DRAGGING, "true");
         document.documentElement.setAttribute(DRAGGING, "");
         schedule();
-    };
-    const onGripMove = (event: PointerEvent): void => {
-        if (!dragging) return;
-        const g = geometry();
-        if (g.travel) scrollTo(startTop + ((event.clientY - startY) * g.range) / g.travel, "instant");
-    };
-    const onGripUp = (event: PointerEvent): void => {
-        if (!dragging) return;
-        dragging = false;
-        if (grip.hasPointerCapture(event.pointerId)) grip.releasePointerCapture(event.pointerId);
-        write(strip, DRAGGING, "false");
-        document.documentElement.removeAttribute(DRAGGING);
-        // Fade as after any scroll, not at once.
-        onScroll();
     };
 
     /* A press on the strip, off the grip: glide there, the grip centred on
@@ -205,9 +225,6 @@ function setup(strip: HTMLElement): Bar | null {
     events.addEventListener("scroll", onScroll, { passive: true });
     addEventListener("resize", schedule);
     grip.addEventListener("pointerdown", onGripDown);
-    grip.addEventListener("pointermove", onGripMove);
-    grip.addEventListener("pointerup", onGripUp);
-    grip.addEventListener("pointercancel", onGripUp);
     strip.addEventListener("pointerdown", onStripDown);
     strip.addEventListener("pointerenter", onEnter);
     strip.addEventListener("pointerleave", onLeave);
@@ -220,17 +237,14 @@ function setup(strip: HTMLElement): Bar | null {
             ro.disconnect();
             events.removeEventListener("scroll", onScroll);
             removeEventListener("resize", schedule);
+            endDrag();
             grip.removeEventListener("pointerdown", onGripDown);
-            grip.removeEventListener("pointermove", onGripMove);
-            grip.removeEventListener("pointerup", onGripUp);
-            grip.removeEventListener("pointercancel", onGripUp);
             strip.removeEventListener("pointerdown", onStripDown);
             strip.removeEventListener("pointerenter", onEnter);
             strip.removeEventListener("pointerleave", onLeave);
             clearTimeout(timer);
             if (frame) cancelAnimationFrame(frame);
             if (!page) scroller.removeAttribute(HOST);
-            if (dragging) document.documentElement.removeAttribute(DRAGGING);
         },
     };
 }

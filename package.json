@@ -1,6 +1,6 @@
 {
     "name": "@plusguard/scrollbar",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "A custom scrollbar from HTML attributes: a thin bar that shows on hover and while scrolling, and can be dragged or clicked — for the page and for any scrolling panel or pop-up, with or without Lenis. Zero dependencies, framework-agnostic. CSS included.",
     "type": "module",
     "main": "./dist/index.js",

@@ -15,7 +15,7 @@ framework-agnostic.
 ```
 
 ```sh
-npm install github:omisilli/scrollbar#v1.0.0
+npm install github:omisilli/scrollbar#v1.1.0
 ```
 
 ```ts
@@ -34,16 +34,16 @@ Or from CSS, which lets you pick the cascade layer:
 ### Without a build step
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.0.0/index.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.0/index.css" />
 
 <script type="module">
-    import { initScrollbar } from "https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.0.0/dist/index.js";
+    import { initScrollbar } from "https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.0/dist/index.js";
 
     initScrollbar();
 </script>
 ```
 
-Pin the version (`@v1.0.0`) on a live site. A pinned URL never changes;
+Pin the version (`@v1.1.0`) on a live site. A pinned URL never changes;
 `@1` follows the newest 1.x release.
 
 ## Why your own bar
@@ -78,27 +78,40 @@ the screen even when the page is short:
 ```html
 <body>
     <div class="page" style="min-height: 100dvh; display: flex; flex-direction: column">
-        <div class="page-up" style="flex: 1" data-pg-scrollbar-gutter>
+        <div class="page-up" style="flex: 1">
             <div data-pg-scrollbar>…</div>
-            …the page…
+            <section data-pg-scrollbar-gutter>…</section>
+            <section class="slider">…full width, no gutter…</section>
+            <section data-pg-scrollbar-gutter>…</section>
         </div>
         <footer data-pg-scrollbar-gutter>…</footer>
     </div>
 </body>
 ```
 
-### The gutter
+### The gutter — per section
 
 The bar floats over the content, unlike the browser's own, which takes
 its room. Centred content would sit off-centre in what is visible.
-`data-pg-scrollbar-gutter` gives an element `padding-inline-end` of the
-strip's width: its background still runs to the edge, under the bar, and
-its content centres in what is left.
+`data-pg-scrollbar-gutter` keeps the strip's width free on the inline end:
+the section's background still runs to the edge, under the bar, and its
+content centres in what is left.
 
-Give it to what scrolls with the page — the content wrapper, the footer —
-not to fixed parts such as a header, which the bar does not scroll. It
-replaces the element's own right padding, so put it on a full-width
-wrapper rather than on something padded.
+**Give it to each section that needs it — never to `<body>` or to one
+wrapper around the whole page.** Some parts must run under the bar to the
+screen's edge: a full-width slider, a banner, a video. With the gutter on
+a wrapper they would stop 18px short on the right. So, per section:
+
+| Part                                        | Gutter |
+| ------------------------------------------- | ------ |
+| A content section, a footer                 | yes    |
+| A full-width slider, banner, video          | no — it runs under the bar |
+| A fixed header or panel                     | no — the bar does not scroll it |
+| Rows of a panel's list                      | yes, if the panel has its own bar |
+
+It is a transparent border, not padding, so it adds to a section's own
+padding rather than replacing it; its colour is forced to transparent, so
+a `border-color` of yours (a utility class, say) does not paint it.
 
 It applies only where the bar is shown: with a script and a mouse.
 
@@ -132,7 +145,9 @@ picked up as it appears; one that is closed takes its size when it opens.
   separate ticks of a wheel do not make it blink.
 - **Dragging** is immediate, as with the browser's own bar. The hand stays
   closed and no text is selected for as long as the drag lasts, wherever
-  the pointer goes.
+  the pointer goes. It ends on release — and on any move with the button
+  already up, or when the window loses focus, so a release missed outside
+  the window cannot leave the page following the pointer.
 - **Pressing the strip** off the grip glides there, the grip centred on
   the press — at once with reduced motion asked for.
 - **Nothing to scroll** — everything fits — and the strip is not shown.
@@ -173,12 +188,20 @@ dragged, say: `[data-pg-scrollbar-dragging="true"] { … }`.
 | --------------------------- | -------------------------- | ----------------------------------------------- |
 | `--pg-scrollbar-area`       | `18px`                     | The strip's width — and the gutter's            |
 | `--pg-scrollbar-inset`      | `4px`                      | Gap to the strip's ends and its outer edge      |
-| `--pg-scrollbar-size`       | `6px`                      | The thumb's thickness                           |
+| `--pg-scrollbar-size`       | `8px`                      | The thumb's thickness                           |
 | `--pg-scrollbar-size-hover` | `10px`                     | …under the pointer, and while dragged           |
 | `--pg-scrollbar-min`        | `32px`                     | The shortest grip, on a very long page          |
-| `--pg-scrollbar-color`      | `rgb(127 127 127 / 0.6)`   | The thumb — light and dark themes alike; a brand colour works too |
-| `--pg-scrollbar-track`      | `rgb(127 127 127 / 0.1)`   | The strip while shown                           |
-| `--pg-scrollbar-shadow`     | `0 0 4px rgb(0 0 0 / 0.2)` | Around the thumb, so it shows over photos; `none` for none |
+| `--pg-scrollbar-color`      | the text colour at 60%     | The thumb — dark on a light page, light on a dark one; a brand colour works too |
+| `--pg-scrollbar-color-hover`| the text colour at 70%     | The thumb under the pointer, and while dragged  |
+| `--pg-scrollbar-track`      | the text colour at 10%     | The strip while shown                           |
+| `--pg-scrollbar-shadow`     | `none`                     | Around the thumb — e.g. `0 0 4px rgb(0 0 0 / 0.25)` to show over photos |
+
+The colours come from `currentColor`: on a light page with dark text they
+are the old theme's `rgba(0,0,0,.6)` / `.7` / `.1`; switch the theme to
+dark and they turn light with it.
+
+**Always shown?** `data-pg-scrollbar-idle="none"` on the strip keeps it on
+screen; it still darkens and thickens under the pointer.
 
 Set them anywhere above the strip, per screen size if you like. Every
 look rule is at zero weight (`:where`), so a class of yours wins.
@@ -202,7 +225,7 @@ when a lock clips the page — and the bar steps away with it.
 | Hidden while `html.lenis-stopped`                         | Hidden while the page cannot scroll — any lock    |
 | Hidden below 992px                                        | Hidden on touch screens, whatever their width     |
 | `body::-webkit-scrollbar { display: none }`, always       | Only where this bar works, and Firefox too        |
-| `.qua-mainArea { padding-right: 18px }`                   | `data-pg-scrollbar-gutter`                        |
+| `.qua-mainArea { padding-right: 18px }`, per section      | `data-pg-scrollbar-gutter`, per section           |
 | Page only; panels styled with `::-webkit-scrollbar`       | Panels and pop-ups get the same bar               |
 | Drag only                                                 | Drag, and a press on the strip                    |
 

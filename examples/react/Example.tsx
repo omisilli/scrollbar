@@ -30,30 +30,40 @@ export function Example() {
             <Scrollbars />
 
             {/* The page: content up top, footer at the bottom of the screen
-                even on a short page. The gutter keeps the strip's width free,
-                so the content centres in what is left. */}
+                even on a short page. */}
             <div className="flex min-h-dvh flex-col">
-                <div className="flex-1" data-pg-scrollbar-gutter>
+                <div className="flex-1">
                     <Bar />
 
                     {/* Fixed: the bar does not scroll it — no gutter. */}
                     <header className="fixed inset-x-0 top-0 h-14 bg-white/90 backdrop-blur" />
 
-                    <main className="mx-auto max-w-3xl px-4 pt-24">
-                        {/* A panel with its own bar: the box is positioned and does
-                            not scroll; the list does. data-lenis-prevent keeps
-                            Lenis off the list's own scroll. */}
-                        <div className="relative h-72 overflow-hidden rounded-lg border">
-                            <ul id="items" data-lenis-prevent className="h-full overflow-y-auto">
-                                {Array.from({ length: 40 }, (_, i) => (
-                                    <li key={i} data-pg-scrollbar-gutter className="border-b py-2 pl-4">
-                                        Item {i + 1}
-                                    </li>
-                                ))}
-                            </ul>
-                            <Bar of="#items" />
-                        </div>
-                    </main>
+                    {/* data-pg-scrollbar-gutter on each section, as needed: the
+                        strip's width is kept free, so the content centres in what
+                        is left. */}
+                    <section data-pg-scrollbar-gutter>
+                        <main className="mx-auto max-w-3xl px-4 pt-24">
+                            {/* A panel with its own bar: the box is positioned and does
+                                not scroll; the list does. data-lenis-prevent keeps
+                                Lenis off the list's own scroll. */}
+                            <div className="relative h-72 overflow-hidden rounded-lg border">
+                                <ul id="items" data-lenis-prevent className="h-full overflow-y-auto">
+                                    {Array.from({ length: 40 }, (_, i) => (
+                                        <li key={i} data-pg-scrollbar-gutter className="border-b py-2 pl-4">
+                                            Item {i + 1}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <Bar of="#items" />
+                            </div>
+                        </main>
+                    </section>
+
+                    {/* A full-width slider: no gutter — it runs under the bar. */}
+                    <section className="flex h-48">
+                        <div className="flex-1 bg-neutral-900" />
+                        <div className="flex-1 bg-neutral-500" />
+                    </section>
                 </div>
 
                 <footer data-pg-scrollbar-gutter className="border-t p-12 text-center">
