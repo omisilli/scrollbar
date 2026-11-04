@@ -137,6 +137,29 @@ Lenis on the page, `data-lenis-prevent` keeps the list's own scroll.
 A panel that appears later — a pop-up opening, a route changing — is
 picked up as it appears; one that is closed takes its size when it opens.
 
+### In a panel that opens and closes
+
+A dropdown body, a menu, a pop-up: the box that holds the list and its bar
+is often hidden by whatever opens it — with `display: none` or a closed
+popover. If you make that box a flex column so the list fills it, give it
+`display` **only while open**; a `display` of yours on the closed box beats
+the hiding, and the closed panel stays on screen.
+
+```html
+<!-- With the dropdown package: flex only while its container is active -->
+<div data-pg-dropdown class="group">
+    <button data-pg-dropdown-head>…</button>
+    <div data-pg-dropdown-body class="max-h-72 flex-col overflow-hidden group-data-[pg-dropdown-active=true]:flex">
+        <div id="names" class="min-h-0 flex-1 overflow-y-auto">…</div>
+        <div data-pg-scrollbar="#names">…</div>
+    </div>
+</div>
+```
+
+The body keeps its height limit and does not scroll; the list fills it and
+scrolls, with the bar beside it. Rows above the list — a search field —
+stay put while it scrolls.
+
 ## Behaviour
 
 - **Showing.** Hidden until the pointer is over the strip or the page (or
