@@ -1,0 +1,142 @@
+/*
+ * scrollbar — the CSS half.
+ *
+ * Lengths and colours, set anywhere above the strip — media queries
+ * welcome:
+ *   --pg-scrollbar-area         the strip's width: where the pointer finds
+ *                               the bar, and the room data-pg-scrollbar-
+ *                               gutter leaves. 18px
+ *   --pg-scrollbar-inset        the gap to the strip's ends and outer edge.
+ *                               4px
+ *   --pg-scrollbar-size         the thumb's thickness. 6px
+ *   --pg-scrollbar-size-hover   its thickness under the pointer. 10px
+ *   --pg-scrollbar-min          the shortest grip, on a very long page. 32px
+ *   --pg-scrollbar-color        the thumb. A half-tone grey at 60%, for
+ *                               light and dark themes alike
+ *   --pg-scrollbar-track        the strip while shown. The same grey at 10%
+ *   --pg-scrollbar-shadow       around the thumb, so it shows over photos
+ *                               too. 0 0 4px rgb(0 0 0 / 0.2)
+ *
+ * The bar works only with a script and a mouse — (scripting: enabled) and
+ * (pointer: fine). Elsewhere — no script, a touch screen — the strip is not
+ * shown and the browser's own bar stays.
+ */
+
+@property --pg-scrollbar-area {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 18px;
+}
+
+@property --pg-scrollbar-inset {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 4px;
+}
+
+@property --pg-scrollbar-min {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 32px;
+}
+
+:where([data-pg-scrollbar]) {
+    display: none;
+}
+
+/* Not needed — everything fits, or the scrolling is locked. */
+[data-pg-scrollbar][data-pg-scrollbar-needed="false"] {
+    display: none;
+}
+
+@media (scripting: enabled) and (pointer: fine) {
+    /* The browser's own bar steps aside wherever ours takes over — for the
+       page from the first frame (it is decided by CSS, not the script), so
+       nothing shifts sideways when the script arrives. */
+    html:has(:is([data-pg-scrollbar=""], [data-pg-scrollbar="true"])),
+    html:has(:is([data-pg-scrollbar=""], [data-pg-scrollbar="true"])) body,
+    [data-pg-scrollbar-host] {
+        scrollbar-width: none;
+    }
+    html:has(:is([data-pg-scrollbar=""], [data-pg-scrollbar="true"]))::-webkit-scrollbar,
+    html:has(:is([data-pg-scrollbar=""], [data-pg-scrollbar="true"])) body::-webkit-scrollbar,
+    [data-pg-scrollbar-host]::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Room for the strip, which floats over the content: what carries
+       this attribute keeps its background to the edge and centres its
+       content in what is left. Not on fixed parts such as a header — the
+       bar does not scroll them. */
+    html:has([data-pg-scrollbar]) [data-pg-scrollbar-gutter] {
+        padding-inline-end: var(--pg-scrollbar-area);
+    }
+
+    /* The strip: a panel's, at its box's edge; the page's, at the screen's. */
+    :where([data-pg-scrollbar]) {
+        display: block;
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 0;
+        z-index: 2;
+        width: var(--pg-scrollbar-area);
+        padding-block: var(--pg-scrollbar-inset);
+        box-sizing: border-box;
+        transition: background-color 0.3s;
+    }
+    :where([data-pg-scrollbar=""], [data-pg-scrollbar="true"]) {
+        position: fixed;
+        z-index: 50;
+    }
+    :where([data-pg-scrollbar][data-pg-scrollbar-active="true"]) {
+        background-color: var(--pg-scrollbar-track, rgb(127 127 127 / 0.1));
+    }
+
+    /* The grip: as wide as the strip, so it is easy to take hold of; index.ts
+       sizes it and moves it. */
+    :where([data-pg-scrollbar-grip]) {
+        position: absolute;
+        top: var(--pg-scrollbar-inset);
+        inset-inline: 0;
+        height: var(--pg-scrollbar-grip-size, 0px);
+        translate: 0 var(--pg-scrollbar-grip-offset, 0px);
+        display: flex;
+        justify-content: flex-end;
+        padding-inline-end: var(--pg-scrollbar-inset);
+        box-sizing: border-box;
+        cursor: grab;
+        touch-action: none;
+    }
+
+    :where([data-pg-scrollbar-thumb]) {
+        width: var(--pg-scrollbar-size, 6px);
+        height: 100%;
+        border-radius: 999px;
+        background-color: var(--pg-scrollbar-color, rgb(127 127 127 / 0.6));
+        box-shadow: var(--pg-scrollbar-shadow, 0 0 4px rgb(0 0 0 / 0.2));
+        opacity: 0;
+        transition:
+            opacity 0.3s,
+            width 0.2s;
+    }
+    :where([data-pg-scrollbar-active="true"]) :where([data-pg-scrollbar-thumb]) {
+        opacity: 1;
+    }
+    :where([data-pg-scrollbar]:hover, [data-pg-scrollbar-dragging="true"]) :where([data-pg-scrollbar-thumb]) {
+        width: var(--pg-scrollbar-size-hover, 10px);
+    }
+
+    /* While dragging: the hand stays closed wherever the pointer goes, and
+       no text is selected on the way. */
+    html[data-pg-scrollbar-dragging],
+    html[data-pg-scrollbar-dragging] * {
+        cursor: grabbing !important;
+        user-select: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :where([data-pg-scrollbar], [data-pg-scrollbar-thumb]) {
+        transition: none;
+    }
+}

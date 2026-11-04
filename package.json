@@ -1,0 +1,21 @@
+{
+    "name": "@plusguard/scrollbar",
+    "version": "1.0.0",
+    "description": "A custom scrollbar from HTML attributes: a thin bar that shows on hover and while scrolling, and can be dragged or clicked — for the page and for any scrolling panel or pop-up, with or without Lenis. Zero dependencies, framework-agnostic. CSS included.",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+        "./index.css": "./index.css"
+    },
+    "files": ["dist", "index.ts", "index.css", "README.md", "LICENSE"],
+    "sideEffects": ["*.css"],
+    "scripts": {
+        "build": "npx -p typescript tsc index.ts --outDir dist --declaration --target es2020 --module es2020 --lib dom,es2020 --strict"
+    },
+    "license": "MIT",
+    "author": "PlusGuard",
+    "repository": { "type": "git", "url": "git+https://github.com/omisilli/scrollbar.git" },
+    "keywords": ["scrollbar", "custom-scrollbar", "overlay-scrollbar", "lenis", "popup", "data-attributes", "vanilla"]
+}
