@@ -15,7 +15,7 @@ framework-agnostic.
 ```
 
 ```sh
-npm install github:omisilli/scrollbar#v1.1.0
+npm install github:omisilli/scrollbar#v1.1.1
 ```
 
 ```ts
@@ -34,16 +34,16 @@ Or from CSS, which lets you pick the cascade layer:
 ### Without a build step
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.0/index.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.1/index.css" />
 
 <script type="module">
-    import { initScrollbar } from "https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.0/dist/index.js";
+    import { initScrollbar } from "https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.1/dist/index.js";
 
     initScrollbar();
 </script>
 ```
 
-Pin the version (`@v1.1.0`) on a live site. A pinned URL never changes;
+Pin the version (`@v1.1.1`) on a live site. A pinned URL never changes;
 `@1` follows the newest 1.x release.
 
 ## Why your own bar
@@ -113,7 +113,10 @@ It is a transparent border, not padding, so it adds to a section's own
 padding rather than replacing it; its colour is forced to transparent, so
 a `border-color` of yours (a utility class, say) does not paint it.
 
-It applies only where the bar is shown: with a script and a mouse.
+It applies only where a bar of ours is shown — with a script and a mouse,
+and only over its own ground: on the page's sections while the page has
+its own bar, on a panel's rows while that panel has one. A page that keeps
+the browser's own bar but gives a pop-up ours leaves its sections alone.
 
 ## Panels and pop-ups
 

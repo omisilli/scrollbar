@@ -70,8 +70,14 @@
        in what is left. A transparent border, not padding, so it adds to the
        section's own padding instead of replacing it; the colour is forced
        so a utility's border-color cannot paint it. Per section, as needed —
-       not on a full-width slider or banner, which should run under the bar. */
-    html:has([data-pg-scrollbar]) [data-pg-scrollbar-gutter] {
+       not on a full-width slider or banner, which should run under the bar.
+
+       Only where a bar of ours floats over it: the page's sections while
+       the page has its own bar, a panel's rows while that panel has one.
+       A panel's bar alone leaves the page's sections as they are — the
+       browser's own page bar takes its room by itself. */
+    html:has(:is([data-pg-scrollbar=""], [data-pg-scrollbar="true"])) [data-pg-scrollbar-gutter],
+    [data-pg-scrollbar-host] [data-pg-scrollbar-gutter] {
         border-inline-end: var(--pg-scrollbar-area) solid transparent;
         border-inline-end-color: transparent !important;
     }
