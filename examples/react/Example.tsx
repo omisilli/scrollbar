@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { initScrollbar } from "@plusguard/scrollbar";
 import "@plusguard/scrollbar/index.css";
 
@@ -20,6 +20,64 @@ function Bar({ of }: { of?: string }) {
             <div data-pg-scrollbar-grip>
                 <div data-pg-scrollbar-thumb />
             </div>
+        </div>
+    );
+}
+
+/*
+ * The page's gutter, shown: each row has a box centred in it, a dashed line
+ * at the middle of what can be seen, and a tag at the far end. With
+ * data-pg-scrollbar-gutter the box sits on the line and the tag stays in
+ * sight; without — as a full-width slider, banner or video should be — the
+ * box is half a strip to the right and the tag is under the bar.
+ */
+function GutterRows() {
+    const rows = useRef<HTMLDivElement>(null);
+
+    // How far each box sits from the line.
+    useEffect(() => {
+        const measure = () => {
+            rows.current?.querySelectorAll<HTMLElement>("[data-row]").forEach((row) => {
+                const box = row.querySelector("[data-box]")!.getBoundingClientRect();
+                const line = row.querySelector("[data-line]")!.getBoundingClientRect().left;
+                const off = Math.round(box.left + box.width / 2 - line);
+                row.querySelector("[data-off]")!.textContent = off ? `${off}px right of the line` : "on the line";
+            });
+        };
+        measure();
+        addEventListener("resize", measure);
+        return () => removeEventListener("resize", measure);
+    }, []);
+
+    return (
+        <div ref={rows} className="flex flex-col gap-3">
+            {[
+                { gutter: true, label: "With the gutter" },
+                { gutter: false, label: "Without" },
+            ].map((r) => (
+                <section
+                    key={r.label}
+                    data-row
+                    data-pg-scrollbar-gutter={r.gutter || undefined}
+                    className="relative flex h-36 items-center justify-center bg-neutral-100"
+                >
+                    {/* The middle of what can be seen: with the gutter the row's
+                        own box ends at the strip; without, pull the line back by
+                        half the strip — only where the bar is shown. */}
+                    <span
+                        data-line
+                        aria-hidden
+                        className={`absolute inset-y-0 left-1/2 border-l-2 border-dashed border-blue-600 ${r.gutter ? "" : "pointer-fine:left-[calc(50%-var(--pg-scrollbar-area)/2)]"}`}
+                    />
+                    <div data-box className="rounded-lg border bg-white px-5 py-3 text-center text-sm">
+                        {r.label}
+                        <small data-off className="block text-neutral-500" />
+                    </div>
+                    <span className="absolute inset-y-0 right-0 grid place-items-center bg-blue-600 px-3 text-sm text-white">
+                        end
+                    </span>
+                </section>
+            ))}
         </div>
     );
 }
@@ -59,11 +117,8 @@ export function Example() {
                         </main>
                     </section>
 
-                    {/* A full-width slider: no gutter — it runs under the bar. */}
-                    <section className="flex h-48">
-                        <div className="flex-1 bg-neutral-900" />
-                        <div className="flex-1 bg-neutral-500" />
-                    </section>
+                    {/* The page's gutter, shown: the same full-width row twice. */}
+                    <GutterRows />
                 </div>
 
                 <footer data-pg-scrollbar-gutter className="border-t p-12 text-center">
