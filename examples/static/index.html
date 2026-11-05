@@ -97,6 +97,58 @@
             }
 
             /* Each section full width, its content in a centred wrap. */
+            /* --- The page's gutter: two full-width rows, each with a box
+                   centred in it, a dashed line at the middle of what can be
+                   seen, and a tag at the far right end. --- */
+            .row {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 9rem;
+                background: var(--hover);
+            }
+            .row + .row {
+                margin-top: 0.75rem;
+            }
+            .row .centred {
+                padding: 0.8rem 1.2rem;
+                text-align: center;
+                background: var(--surface);
+                border: 1px solid var(--line);
+                border-radius: 0.6rem;
+            }
+            .row .centred small {
+                display: block;
+                color: var(--muted);
+            }
+            .row .end {
+                position: absolute;
+                inset-block: 0;
+                right: 0;
+                display: grid;
+                place-items: center;
+                padding: 0 0.6rem;
+                color: #fff;
+                font-weight: 600;
+                background: var(--accent);
+            }
+            /* The middle of what can be seen: where the strip begins, halved.
+               In the gutter row its own box already ends there; in the other
+               the line is pulled back by half the strip. Only where the bar is
+               shown — elsewhere the whole width is seen. */
+            .row .guide {
+                position: absolute;
+                inset-block: 0;
+                left: 50%;
+                border-left: 2px dashed var(--accent);
+            }
+            @media (scripting: enabled) and (pointer: fine) {
+                .row:not([data-pg-scrollbar-gutter]) .guide {
+                    left: calc(50% - var(--pg-scrollbar-area) / 2);
+                }
+            }
+
             .wrap {
                 max-width: 52rem;
                 margin: 0 auto;
@@ -184,6 +236,10 @@
             /* --- The pop-up: a <dialog>. While it is open the page is
                    locked, so the page's bar steps away by itself. --- */
             dialog {
+                /* The reset's margin: 0 takes away the browser's own
+                   centring; auto gives it back — middle of the screen, both
+                   ways. */
+                margin: auto;
                 width: min(26rem, calc(100vw - 2rem));
                 padding: 0;
                 border: 1px solid var(--line);
@@ -253,6 +309,36 @@
                             a touch screen, or with no script, the browser's bar stays.
                         </p>
                     </div>
+                </section>
+
+                <section data-pg-scrollbar-gutter>
+                    <div class="wrap">
+                        <h2>The page's gutter — what is centred, and what is hidden</h2>
+                        <p>
+                            The bar floats over the page, so what you can see ends where its
+                            strip begins, 18px from the right. The dashed line marks the middle
+                            of what you can see. Point at the right edge to bring the bar up.
+                        </p>
+                        <p>
+                            With <code>data-pg-scrollbar-gutter</code> the row's content is laid
+                            out in what the bar leaves: the box sits on the line, the tag at the
+                            end stays in sight. Without it the row is laid out in the whole width:
+                            the box is half a strip to the right of the line, the tag is under the
+                            bar. Give it to the content sections; leave it off a full-width
+                            slider, a banner, a video.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="row" data-pg-scrollbar-gutter aria-label="With the gutter">
+                    <span class="guide" aria-hidden="true"></span>
+                    <div class="centred">With the gutter<small data-off></small></div>
+                    <span class="end">end</span>
+                </section>
+                <section class="row" aria-label="Without the gutter">
+                    <span class="guide" aria-hidden="true"></span>
+                    <div class="centred">Without<small data-off></small></div>
+                    <span class="end">end</span>
                 </section>
 
                 <section data-pg-scrollbar-gutter>
@@ -346,6 +432,20 @@
             document.getElementById("popup-items").innerHTML = rows(true);
 
             initScrollbar();
+
+            // How far each row's box sits from the middle of what is seen.
+            const measure = () => {
+                document.querySelectorAll(".row").forEach((row) => {
+                    const box = row.querySelector(".centred").getBoundingClientRect();
+                    const line = row.querySelector(".guide").getBoundingClientRect().left;
+                    const off = Math.round(box.left + box.width / 2 - line);
+                    row.querySelector("[data-off]").textContent = off
+                        ? `${off}px right of the line`
+                        : "on the line";
+                });
+            };
+            measure();
+            addEventListener("resize", measure);
 
             const popup = document.getElementById("popup");
             document.getElementById("open").addEventListener("click", () => popup.showModal());
