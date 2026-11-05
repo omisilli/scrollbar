@@ -106,30 +106,6 @@
                 padding-top: 6rem;
             }
 
-            /* Two full-width rows of boxes, to compare: one with the gutter,
-               one without. The section's own background is the line colour,
-               so the gutter shows as the strip of it left at the edge. */
-            .slider {
-                display: flex;
-                overflow: hidden;
-                height: 10rem;
-                background: var(--line);
-            }
-            .slider div {
-                flex: 1;
-                display: grid;
-                place-items: center;
-                padding: 1rem;
-                text-align: center;
-                color: var(--bg);
-                background: var(--fg);
-            }
-            .slider div:nth-child(2) {
-                background: var(--muted);
-            }
-            .slider + .slider {
-                margin-top: 0.75rem;
-            }
             h1 {
                 font-size: 1.75rem;
                 line-height: 1.2;
@@ -175,8 +151,34 @@
                 overscroll-behavior: contain;
             }
             .panel li {
-                padding: 0.6rem 1rem;
+                display: flex;
+                justify-content: space-between;
+                padding: 0.6rem 0 0.6rem 1rem;
                 border-bottom: 1px solid var(--line);
+            }
+            /* The row's number, at its very end: under the bar, or not. */
+            .panel li b {
+                font-weight: 600;
+                color: var(--accent);
+            }
+            .panels {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+                gap: 1.25rem;
+                margin-top: 1.25rem;
+            }
+            .panels .panel {
+                margin-top: 0;
+                max-width: none;
+            }
+            figure {
+                margin: 0;
+                display: grid;
+                gap: 0.5rem;
+            }
+            figcaption {
+                font-size: 0.85rem;
+                color: var(--muted);
             }
 
             /* --- The pop-up: a <dialog>. While it is open the page is
@@ -255,47 +257,41 @@
 
                 <section data-pg-scrollbar-gutter>
                     <div class="wrap">
-                        <h2>A panel's bar</h2>
+                        <h2>A panel's bar — without the gutter, and with it</h2>
                         <p>
-                            The list scrolls; the bar sits beside it in the panel's box and names
-                            the list: <code>data-pg-scrollbar="#items"</code>. The list's own bar
-                            is hidden in every browser, Firefox too.
+                            Each list scrolls; its bar sits beside it in the panel's box and names
+                            it: <code>data-pg-scrollbar="#plain"</code>. The list's own bar is hidden
+                            in every browser, Firefox too. Scroll either list, or point at its right
+                            edge, and watch the numbers.
                         </p>
-                        <div class="panel">
-                            <ul id="items" data-lenis-prevent></ul>
-                            <div data-pg-scrollbar="#items">
-                                <div data-pg-scrollbar-grip>
-                                    <div data-pg-scrollbar-thumb></div>
+                        <div class="panels">
+                            <figure>
+                                <div class="panel">
+                                    <ul id="plain" data-lenis-prevent></ul>
+                                    <div data-pg-scrollbar="#plain">
+                                        <div data-pg-scrollbar-grip>
+                                            <div data-pg-scrollbar-thumb></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                                <figcaption>Without — the numbers run under the bar</figcaption>
+                            </figure>
+                            <figure>
+                                <div class="panel">
+                                    <ul id="kept" data-lenis-prevent></ul>
+                                    <div data-pg-scrollbar="#kept">
+                                        <div data-pg-scrollbar-grip>
+                                            <div data-pg-scrollbar-thumb></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <figcaption>
+                                    With <code>data-pg-scrollbar-gutter</code> on each row — the
+                                    numbers stop short of it
+                                </figcaption>
+                            </figure>
                         </div>
                     </div>
-                </section>
-
-                <section data-pg-scrollbar-gutter>
-                    <div class="wrap">
-                        <h2>With the gutter, and without</h2>
-                        <p>
-                            The same full-width row twice. Point at the right edge, or scroll, to
-                            bring the bar up over both.
-                        </p>
-                    </div>
-                </section>
-
-                <!-- With the gutter: the boxes stop short of the strip; the
-                     section's background runs on under the bar. For content. -->
-                <section class="slider" data-pg-scrollbar-gutter aria-label="With the gutter">
-                    <div>With data-pg-scrollbar-gutter</div>
-                    <div>the boxes stop short of the bar</div>
-                    <div>the background runs on under it</div>
-                </section>
-
-                <!-- Without: the boxes run under the bar to the screen's edge.
-                     For a full-width slider, a banner, a video. -->
-                <section class="slider" aria-label="Without the gutter">
-                    <div>Without</div>
-                    <div>the boxes run under the bar</div>
-                    <div>to the screen's edge</div>
                 </section>
 
                 <section data-pg-scrollbar-gutter>
@@ -338,12 +334,16 @@
         <script type="module">
             import { initScrollbar } from "https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.0/dist/index.js";
 
-            for (const id of ["items", "popup-items"]) {
-                document.getElementById(id).innerHTML = Array.from(
-                    { length: 40 },
-                    (_, i) => `<li data-pg-scrollbar-gutter>Item ${String(i + 1).padStart(2, "0")}</li>`,
-                ).join("");
-            }
+            // Rows with a number at their far end. The gutter is per row, as
+            // it is per section on the page.
+            const rows = (gutter) =>
+                Array.from({ length: 40 }, (_, i) => {
+                    const n = String(i + 1).padStart(2, "0");
+                    return `<li${gutter ? " data-pg-scrollbar-gutter" : ""}><span>Item ${n}</span><b>${n}</b></li>`;
+                }).join("");
+            document.getElementById("plain").innerHTML = rows(false);
+            document.getElementById("kept").innerHTML = rows(true);
+            document.getElementById("popup-items").innerHTML = rows(true);
 
             initScrollbar();
 
