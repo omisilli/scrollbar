@@ -106,21 +106,29 @@
                 padding-top: 6rem;
             }
 
-            /* A full-width slider: no gutter, so it runs under the bar. */
+            /* Two full-width rows of boxes, to compare: one with the gutter,
+               one without. The section's own background is the line colour,
+               so the gutter shows as the strip of it left at the edge. */
             .slider {
                 display: flex;
                 overflow: hidden;
-                height: 12rem;
+                height: 10rem;
+                background: var(--line);
             }
             .slider div {
                 flex: 1;
                 display: grid;
                 place-items: center;
+                padding: 1rem;
+                text-align: center;
                 color: var(--bg);
                 background: var(--fg);
             }
             .slider div:nth-child(2) {
                 background: var(--muted);
+            }
+            .slider + .slider {
+                margin-top: 0.75rem;
             }
             h1 {
                 font-size: 1.75rem;
@@ -264,12 +272,30 @@
                     </div>
                 </section>
 
-                <!-- A full-width slider: no gutter — it runs under the bar to the
-                     screen's edge. -->
-                <section class="slider" aria-label="A full-width slider">
-                    <div>No gutter here</div>
-                    <div>— it runs under the bar —</div>
-                    <div>to the edge</div>
+                <section data-pg-scrollbar-gutter>
+                    <div class="wrap">
+                        <h2>With the gutter, and without</h2>
+                        <p>
+                            The same full-width row twice. Point at the right edge, or scroll, to
+                            bring the bar up over both.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- With the gutter: the boxes stop short of the strip; the
+                     section's background runs on under the bar. For content. -->
+                <section class="slider" data-pg-scrollbar-gutter aria-label="With the gutter">
+                    <div>With data-pg-scrollbar-gutter</div>
+                    <div>the boxes stop short of the bar</div>
+                    <div>the background runs on under it</div>
+                </section>
+
+                <!-- Without: the boxes run under the bar to the screen's edge.
+                     For a full-width slider, a banner, a video. -->
+                <section class="slider" aria-label="Without the gutter">
+                    <div>Without</div>
+                    <div>the boxes run under the bar</div>
+                    <div>to the screen's edge</div>
                 </section>
 
                 <section data-pg-scrollbar-gutter>
