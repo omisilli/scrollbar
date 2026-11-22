@@ -15,7 +15,7 @@ framework-agnostic.
 ```
 
 ```sh
-npm install github:omisilli/scrollbar#v1.1.1
+npm install @plusguard/scrollbar
 ```
 
 ```ts
@@ -34,16 +34,16 @@ Or from CSS, which lets you pick the cascade layer:
 ### Without a build step
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.1/index.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@plusguard/scrollbar@1.1.2/index.css" />
 
 <script type="module">
-    import { initScrollbar } from "https://cdn.jsdelivr.net/gh/omisilli/scrollbar@v1.1.1/dist/index.js";
+    import { initScrollbar } from "https://cdn.jsdelivr.net/npm/@plusguard/scrollbar@1.1.2/dist/index.js";
 
     initScrollbar();
 </script>
 ```
 
-Pin the version (`@v1.1.1`) on a live site. A pinned URL never changes;
+Pin the version (`@1.1.2`) on a live site. A pinned URL never changes;
 `@1` follows the newest 1.x release.
 
 ## Why your own bar
